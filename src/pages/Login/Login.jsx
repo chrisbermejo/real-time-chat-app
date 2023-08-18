@@ -23,6 +23,10 @@ function Login() {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
+                    "Access-Control-Allow-Headers": "Content-Type",
+                    "Access-Control-Allow-Origin": "*",
+                    'Content-Type': 'application/json',
+                    "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PATCH",
                     'Cache-Control': 'no-cache',
                     'Content-Type': 'application/json'
                 },
