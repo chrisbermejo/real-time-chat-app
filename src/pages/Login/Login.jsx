@@ -22,6 +22,7 @@ function Login() {
             const response = await fetch('https://chrisbermejo-chatroom.up.railway.app/login', {
                 method: 'POST',
                 credentials: 'include',
+                withCredentials: true,
                 headers: {
                     'Cache-Control': 'no-cache',
                     'Content-Type': 'application/json'
