@@ -42,7 +42,8 @@ function Login() {
                 setIsAuthenticated(true);
                 navigate('/channel');
             } else {
-                console.log('failed');
+                setSocket(null);
+                setIsAuthenticated(false);
             }
         } catch (error) {
             console.log(error);
