@@ -22,6 +22,7 @@ function AddFriend() {
             if (response.ok) {
                 const data = await response.json();
                 socket.emit('sendFriendRequest', [data.request.sender.username, data.request.receiver.username], data.request);
+                setErrorMessage('');
             } else if (response.status === 401) {
                 const data = await response.json();
                 setErrorMessage(data.message);

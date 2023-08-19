@@ -181,6 +181,7 @@ export const InfoProvider = ({ children }) => {
         queryFn: async () => {
             await fetchRoomMessages(currentTab.conversationID, conversationMessages[currentTab.conversationID]?.[0]?.date);
             await fetchParticipantsProfilePictures(currentTab.participantsList);
+            setRoomClicked((prev) => ({ ...prev, [currentTab.conversationID]: true, }));
             return true;
         },
         refetchOnWindowFocus: false,
@@ -192,9 +193,6 @@ export const InfoProvider = ({ children }) => {
             setCurrentTab((prevCurrentTab) => ({ ...prevCurrentTab, type: 'friend', conversationID: null, conversationName: null, conversationPicture: null, participantsList: null }));
         } else if (isAuthenticated && ((tab.type === 'group') || (tab.type === 'private'))) {
             setCurrentTab((prevCurrentTab) => ({ ...prevCurrentTab, type: tab.type, conversationID: tab.chatid, conversationName: tab.chat_name, conversationPicture: tab.chat_picture, participantsList: tab.participants }));
-            if (!conversationMessages[tab.chatid] || !(roomClicked[tab.chatid] || false)) {
-                setRoomClicked((prev) => ({ ...prev, [tab.chatid]: true, }));
-            }
         }
     };
 
@@ -243,6 +241,7 @@ export const InfoProvider = ({ children }) => {
                 });
                 if (type) {
                     setFetchedConversations((prev) => [newChat, ...prev]);
+                    setProfilePictures((prevProfilePictures) => ({ ...prevProfilePictures, [newChat.chat_name]: newChat.chat_picture }));
                 }
             });
 
