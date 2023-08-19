@@ -66,7 +66,6 @@ export const InfoProvider = ({ children }) => {
 
     const fetchRoomMessages = async (chatid, date) => {
         try {
-            console.log('fetching...', chatid)
             const response = await fetch((!date ? `https://chrisbermejo-chatroom.up.railway.app/api/room/${chatid}/messages` : `https://chrisbermejo-chatroom.up.railway.app/api/room/${chatid}/messages/?date=${date}`), {
                 method: 'GET',
                 credentials: 'include',

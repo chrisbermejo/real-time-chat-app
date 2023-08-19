@@ -14,7 +14,6 @@ export default function Dialog() {
         const dialogElement = dialogRef.current;
         const HandleDialogClick = (e) => {
             if (e.target.nodeName === 'DIALOG') {
-                console.log('closing dialog')
                 dialogRef.current.close();
             }
         }
