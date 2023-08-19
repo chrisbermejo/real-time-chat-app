@@ -11,6 +11,7 @@ export function ChatRoomInputBar() {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendMessage();
+            e.target.rows = 1;
             setMessage('');
         }
     };

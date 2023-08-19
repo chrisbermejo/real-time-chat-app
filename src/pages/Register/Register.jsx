@@ -7,12 +7,15 @@ function Register() {
 
     const { setSocket } = useSocket();
     const { setUser, setUserProfilePicture, setIsAuthenticated, setUserEmail } = useAuth();
+    const [error, setError] = useState({
+        username: false,
+        email: false
+    });
 
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         const updatedFormData = {
             username: e.target.username.value,
             email: e.target.email.value,
@@ -31,6 +34,7 @@ function Register() {
             });
 
             if (response.ok) {
+                setError(false);
                 setSocket(null);
                 const data = await response.json();
                 setUser(data.username);
@@ -38,6 +42,9 @@ function Register() {
                 setUserEmail(data.email);
                 setIsAuthenticated(true);
                 navigate('/channel');
+            } else if (response.status === 409) {
+                const data = await response.json();
+                setError(data);
             } else {
                 setSocket(null);
                 setIsAuthenticated(false);
@@ -55,12 +62,12 @@ function Register() {
                 </div>
                 <form className='form' onSubmit={handleSubmit}>
                     <div className='form-input'>
-                        <label htmlFor='username' >USERNAME</label>
-                        <input type='text' name='username' required />
+                        <label htmlFor='username' className={error.username ? 'error-text' : ''} >USERNAME</label>
+                        <input type='text' name='username' className={error.username ? 'error-input' : ''} required />
                     </div>
                     <div className='form-input'>
-                        <label htmlFor='email' >EMAIL</label>
-                        <input type='text' name='email' required />
+                        <label htmlFor='email' className={error.email ? 'error-text' : ''}>EMAIL</label>
+                        <input type='text' name='email' className={error.email ? 'error-input' : ''} required />
                     </div>
                     <div className='form-input'>
                         <label htmlFor='password' >PASSWORD</label>

@@ -7,6 +7,7 @@ function Login() {
 
     const { setSocket } = useSocket();
     const { setUser, setUserProfilePicture, setIsAuthenticated, setUserEmail, setRowCount } = useAuth();
+    const [error, setError] = useState(false);
 
     const navigate = useNavigate();
 
@@ -30,6 +31,7 @@ function Login() {
                 body: JSON.stringify(updatedFormData)
             });
             if (response.ok) {
+                setError(false);
                 setSocket(null);
                 const data = await response.json();
                 setUser(data.username);
@@ -41,6 +43,9 @@ function Login() {
                 });
                 setIsAuthenticated(true);
                 navigate('/channel');
+            } else if (response.status === 401) {
+                setError(true);
+                setIsAuthenticated(false);
             } else {
                 setSocket(null);
                 setIsAuthenticated(false);
@@ -56,6 +61,7 @@ function Login() {
                 <div className='form-header-container'>
                     <h2 className='form-header'>Welcome back!</h2>
                     <h4 className='form-subheader'>We're so excited to see you again!</h4>
+                    {error && <h3 className='error-text-login'>Invalid username or password</h3>}
                 </div>
                 <form className='form' onSubmit={handleSubmit}>
                     <div className='form-input'>
