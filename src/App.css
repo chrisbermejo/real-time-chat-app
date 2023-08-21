@@ -255,6 +255,12 @@ body {
     align-items: center;
 }
 
+.room-information {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .chatroom-input {
     background-color: #383a40;
     color: white;
@@ -496,6 +502,8 @@ body {
 
 .room-name {
     font-size: .9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .room-user-count {
