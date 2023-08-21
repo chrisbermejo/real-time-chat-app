@@ -42,7 +42,9 @@ export const InfoProvider = ({ children }) => {
 
     const openDialog = (type) => {
         setDialogType(type);
-        dialogRef.current.showModal();
+        if (type !== 'NONE') {
+            dialogRef.current.showModal();
+        }
     };
 
     const handleFriendVisible = () => {
