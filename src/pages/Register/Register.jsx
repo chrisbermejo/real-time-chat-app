@@ -93,6 +93,7 @@ function Register() {
             const response = await fetch('https://chrisbermejo-chatroom.up.railway.app/register', {
                 method: 'POST',
                 credentials: 'include',
+                withCredentials: true,
                 headers: {
                     'Cache-Control': 'no-cache',
                     'Content-Type': 'application/json'
