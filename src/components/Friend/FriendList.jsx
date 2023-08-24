@@ -19,7 +19,7 @@ function FriendList() {
             </div>
             <h5 className='friend-list-selection-header'>
                 ALL FRIENDS - {
-                    fetchingRoomAndFriendList.isLoading === true ?
+                    fetchingRoomAndFriendList.isLoading === true && !filterFriendList ?
                         ' ' :
                         fetchingRoomAndFriendList.isSuccess === true ?
                             filterFriendList.length : 0
