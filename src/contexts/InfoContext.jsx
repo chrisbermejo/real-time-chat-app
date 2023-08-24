@@ -395,7 +395,11 @@ export const InfoProvider = ({ children }) => {
             setDialogType,
             openDialog,
             fetchingRoomAndFriendList,
-            fetchingRoomMessages
+            fetchingRoomMessages,
+            filter,
+            setFilter,
+            filterFriendList,
+            setFilterFriendList
         }}>
             {children}
         </InfoContext.Provider>
