@@ -21,7 +21,7 @@ function FriendList() {
                 ALL FRIENDS - {
                     fetchingRoomAndFriendList.isLoading === true && !filterFriendList ?
                         ' ' :
-                        fetchingRoomAndFriendList.isSuccess === true ?
+                        fetchingRoomAndFriendList.isSuccess === true && filterFriendList ?
                             filterFriendList.length : 0
                 }
             </h5>
