@@ -1,13 +1,17 @@
-# app/main.py
 from fastapi import FastAPI
 import socketio
-from app.sockets.connection import sio
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.core.database import engine
+from app.models import schemas
+from app.api import auth, messages
+from app.sockets.connection import sio
 
-app = FastAPI(title=settings.PROJECT_NAME)
+schemas.Base.metadata.create_all(bind=engine)
 
-app.add_middleware(
+fastapi_app = FastAPI(title=settings.PROJECT_NAME)
+
+fastapi_app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ALLOWED_ORIGINS,
     allow_credentials=True,
@@ -15,10 +19,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-socket_app = socketio.ASGIApp(sio, other_asgi_app=app)
+fastapi_app.include_router(auth.router, prefix="/api/auth")
+fastapi_app.include_router(messages.router, prefix="/api")
 
-@app.get("/")
+import app.sockets.chat_events 
+
+socket_app = socketio.ASGIApp(sio, other_asgi_app=fastapi_app)
+
+@fastapi_app.get("/")
 async def root():
-    return {"message": "RTC Server is running"}
-
-import app.sockets.chat_events
+    return {"status": "online", "database": "connected"}

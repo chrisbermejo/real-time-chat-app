@@ -1,32 +1,45 @@
 import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
-import { useSocket } from "./context/SocketContext";
 
 function App() {
-    const { isConnected } = useSocket();
-    const [username, setUsername] = useState("");
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [user, setUser] = useState(null);
+    const [usernameInput, setUsernameInput] = useState("");
     const [activeChat, setActiveChat] = useState(null);
 
-    if (!isLoggedIn) {
+    const handleLogin = async () => {
+        const response = await fetch("http://localhost:8000/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: usernameInput }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.id) {
+                setUser(data);
+            }
+        }
+    };
+
+    if (user && user.id) {
         return (
-            <div style={styles.loginContainer}>
-                <h1>Enter your username</h1>
-                <input
-                    style={styles.input}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="e.g. Alex"
-                />
-                <button style={styles.button} onClick={() => setIsLoggedIn(true)}>Join App</button>
+            <div style={{ display: 'flex', height: '100vh' }}>
+                <Sidebar user_id={user.id} activeChat={activeChat} setActiveChat={setActiveChat} />
+                <ChatWindow activeChat={activeChat} username={user.username} />
             </div>
         );
     }
 
     return (
-        <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
-            <Sidebar activeChat={activeChat} setActiveChat={setActiveChat} />
-            <ChatWindow activeChat={activeChat} username={username} />
+        <div style={styles.loginContainer}>
+            <h1>Enter your username</h1>
+            <input
+                style={styles.input}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g. Alex"
+            />
+            <button style={styles.button} onClick={handleLogin}>Join App</button>
         </div>
     );
 }
