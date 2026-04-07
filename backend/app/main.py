@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import engine
 from app.models import schemas
-from app.api import auth, messages
+from app.api import auth, messages, users
 from app.sockets.connection import sio
 
 schemas.Base.metadata.create_all(bind=engine)
@@ -21,6 +21,7 @@ fastapi_app.add_middleware(
 
 fastapi_app.include_router(auth.router, prefix="/api/auth")
 fastapi_app.include_router(messages.router, prefix="/api")
+fastapi_app.include_router(users.router, prefix="/api/users")
 
 import app.sockets.chat_events 
 

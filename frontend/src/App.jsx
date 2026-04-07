@@ -36,7 +36,8 @@ function App() {
             <h1>Enter your username</h1>
             <input
                 style={styles.input}
-                onChange={(e) => setUsername(e.target.value)}
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
                 placeholder="e.g. Alex"
             />
             <button style={styles.button} onClick={handleLogin}>Join App</button>
