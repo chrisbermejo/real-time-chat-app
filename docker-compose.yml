@@ -1,9 +1,8 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15
     container_name: rtc_db
+    restart: always
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -22,7 +21,6 @@ services:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - ENV_FILE=/app/.env 
     depends_on:
       - db
 
@@ -36,3 +34,6 @@ services:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     depends_on:
       - backend
+
+volumes:
+  postgres_data:

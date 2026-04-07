@@ -1,10 +1,19 @@
-import os
-from dotenv import load_dotenv
+# backend/app/core/config.py
+from pydantic_settings import BaseSettings
+from functools import lru_cache
 
-load_dotenv()
+class Settings(BaseSettings):
+    DATABASE_URL: str
+    SECRET_KEY: str = "fallback_secret"
+    ALGORITHM: str = "HS256"
 
-class Settings:
-    PROJECT_NAME: str = "RTC App"
-    CORS_ALLOWED_ORIGINS: list = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    CORS_ALLOWED_ORIGINS: list = ["http://localhost:5173"]
 
-settings = Settings()
+    class Config:
+        env_file = ".env"
+
+@lru_cache()
+def get_settings():
+    return Settings()
+
+settings = get_settings()
