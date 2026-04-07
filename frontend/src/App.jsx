@@ -8,6 +8,8 @@ function App() {
     const [activeChat, setActiveChat] = useState(null);
 
     const handleLogin = async () => {
+        if (!usernameInput) return;
+
         const response = await fetch("http://localhost:8000/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -24,9 +26,9 @@ function App() {
 
     if (user && user.id) {
         return (
-            <div style={{ display: 'flex', height: '100vh' }}>
+            <div style={{ display: 'flex', height: '100vh', background: '#000' }}>
                 <Sidebar user_id={user.id} activeChat={activeChat} setActiveChat={setActiveChat} />
-                <ChatWindow activeChat={activeChat} username={user.username} />
+                <ChatWindow activeChat={activeChat} user={user} />
             </div>
         );
     }

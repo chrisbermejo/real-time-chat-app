@@ -1,76 +1,120 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSocket } from '../context/SocketContext';
 
-const ChatWindow = ({ activeChat, username }) => {
+const ChatWindow = ({ activeChat, user }) => {
     const { socket } = useSocket();
-    const [message, setMessage] = useState("");
-    const [chatHistory, setChatHistory] = useState([]);
+    const [messages, setMessages] = useState([]);
+    const [inputText, setInputText] = useState("");
+    const scrollRef = useRef();
+
+    const activeChatRef = useRef(activeChat);
 
     useEffect(() => {
-        if (!socket || !activeChat) return;
+        activeChatRef.current = activeChat;
+        if (activeChat && activeChat.id) {
+            setMessages([]);
+            fetch(`http://localhost:8000/api/history/${activeChat.id}`)
+                .then(res => res.json())
+                .then(data => {
+                    setMessages(Array.isArray(data) ? data : []);
+                })
+                .catch(err => console.error("Error loading history:", err));
+        }
+    }, [activeChat]);
 
-        socket.emit("join_room", { username, room: activeChat.id });
+    useEffect(() => {
+        if (!socket) return;
 
-        socket.on("new_message", (data) => {
-            setChatHistory((prev) => [...prev, data]);
-        });
+        const handleNewMessage = (msg) => {
+            if (activeChatRef.current && msg.room_id == activeChatRef.current.id) {
+                setMessages((prev) => [...prev, msg]);
+            } else {
+                console.log("Background message received for room:", msg.room_id);
+            }
+        };
+
+        socket.on("new_message", handleNewMessage);
 
         return () => {
-            socket.off("new_message");
+            socket.off("new_message", handleNewMessage);
         };
-    }, [activeChat, socket, username]);
+    }, [socket]);
+
+    useEffect(() => {
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
 
     const sendMessage = (e) => {
         e.preventDefault();
-        if (message.trim()) {
-            socket.emit("send_message", {
-                room: activeChat.id,
-                username: username,
-                text: message
-            });
-            setMessage("");
-        }
+        if (!inputText.trim() || !socket || !activeChat) return;
+
+        socket.emit("send_message", {
+            room_id: activeChat.id,
+            sender_id: user.id,
+            content: inputText
+        });
+        setInputText("");
     };
 
-    if (!activeChat) return <div style={{ flex: 1, textAlign: 'center', paddingTop: '100px' }}>Select a chat to start</div>;
+    if (!activeChat) {
+        return (
+            <div style={styles.emptyState}>
+                <h2 style={{ color: '#444' }}>Select a conversation to start chatting</h2>
+            </div>
+        );
+    }
 
     return (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh' }}>
-            <div style={{ padding: '15px 20px', borderBottom: '1px solid #ddd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2>{activeChat.name}</h2>
-                <button style={{ padding: '8px 15px', borderRadius: '5px', background: '#28a745', color: '#fff', border: 'none', cursor: 'pointer' }}>
+        <div style={styles.container}>
+            <div style={styles.header}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '20px' }}>{activeChat.is_group ? "👥" : "👤"}</span>
+                    <h2 style={{ margin: 0 }}>{activeChat.name}</h2>
+                </div>
+                <button style={styles.callBtn}>
                     📹 Video Call
                 </button>
             </div>
 
-            <div style={{ flex: 1, padding: '20px', overflowY: 'auto', background: '#fff' }}>
-                {chatHistory.map((msg, index) => (
-                    <div key={index} style={{ marginBottom: '15px', textAlign: msg.username === username ? 'right' : 'left' }}>
-                        <div style={{ fontSize: '12px', color: '#888' }}>{msg.username}</div>
-                        <div style={{
-                            display: 'inline-block',
-                            padding: '10px',
-                            borderRadius: '10px',
-                            background: msg.username === username ? '#007bff' : '#eee',
-                            color: msg.username === username ? '#fff' : '#000'
-                        }}>
-                            {msg.text}
-                        </div>
+            <div style={styles.messageList}>
+                {messages.map((m) => (
+                    <div key={m.id || Math.random()} style={{
+                        ...styles.msgBubble,
+                        alignSelf: m.sender_id == user.id ? 'flex-end' : 'flex-start',
+                        background: m.sender_id == user.id ? '#007bff' : '#333',
+                        borderBottomRightRadius: m.sender_id == user.id ? '2px' : '15px',
+                        borderBottomLeftRadius: m.sender_id == user.id ? '15px' : '2px',
+                    }}>
+                        <div style={styles.msgContent}>{m.content}</div>
                     </div>
                 ))}
+                <div ref={scrollRef} />
             </div>
 
-            <form onSubmit={sendMessage} style={{ padding: '20px', borderTop: '1px solid #ddd', display: 'flex' }}>
+            <form onSubmit={sendMessage} style={styles.inputArea}>
                 <input
-                    style={{ flex: 1, padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type a message..."
+                    style={styles.inputField}
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder={`Message ${activeChat.name}...`}
                 />
-                <button type="submit" style={{ marginLeft: '10px', padding: '10px 20px' }}>Send</button>
+                <button type="submit" style={styles.sendBtn}>Send</button>
             </form>
         </div>
     );
+};
+
+const styles = {
+    container: { flex: 1, display: 'flex', flexDirection: 'column', background: '#121212', color: '#fff', height: '100vh' },
+    header: { padding: '15px 25px', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#1a1a1a' },
+    callBtn: { background: '#28a745', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' },
+    messageList: { flex: 1, padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' },
+    msgBubble: { padding: '10px 16px', borderRadius: '15px', maxWidth: '65%', position: 'relative' },
+    msgContent: { fontSize: '15px', lineHeight: '1.4' },
+    inputArea: { padding: '20px', display: 'flex', gap: '12px', background: '#1a1a1a', borderTop: '1px solid #333' },
+    inputField: { flex: 1, padding: '14px', borderRadius: '10px', background: '#2a2a2a', color: '#fff', border: '1px solid #444', outline: 'none' },
+    sendBtn: { padding: '0 25px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' },
+    emptyState: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#121212' }
 };
 
 export default ChatWindow;

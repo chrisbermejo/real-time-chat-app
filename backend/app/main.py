@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import socketio
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.core.config import settings
 from app.core.database import engine
 from app.models import schemas
@@ -18,7 +19,6 @@ fastapi_app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 fastapi_app.include_router(auth.router, prefix="/api/auth")
 fastapi_app.include_router(messages.router, prefix="/api")
 fastapi_app.include_router(users.router, prefix="/api/users")
@@ -29,4 +29,4 @@ socket_app = socketio.ASGIApp(sio, other_asgi_app=fastapi_app)
 
 @fastapi_app.get("/")
 async def root():
-    return {"status": "online", "database": "connected"}
+    return {"status": "online"}
