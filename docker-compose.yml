@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: rtc_db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: rtc_backend
+    volumes:
+      - ./backend:/app
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - ENV_FILE=/app/.env 
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    container_name: rtc_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    depends_on:
+      - backend

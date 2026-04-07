@@ -20,3 +20,5 @@ socket_app = socketio.ASGIApp(sio, other_asgi_app=app)
 @app.get("/")
 async def root():
     return {"message": "RTC Server is running"}
+
+import app.sockets.chat_events
