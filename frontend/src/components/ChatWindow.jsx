@@ -47,7 +47,7 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
     return (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#121212', color: '#fff' }}>
             <div style={{ padding: '15px 20px', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between' }}>
-                <h2>{activeChat.name}</h2>
+                <h2 style={{ display: 'flex', alignItems: 'center' }}>{activeChat.name}</h2>
                 <button style={{ background: '#28a745', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '8px' }}>📹 Video Call</button>
             </div>
 
