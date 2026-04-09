@@ -1,56 +1,103 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
+import { useSocket } from "./context/SocketContext";
+import "./App.css";
 
 function App() {
+    const { socket } = useSocket();
     const [user, setUser] = useState(null);
     const [usernameInput, setUsernameInput] = useState("");
     const [activeChat, setActiveChat] = useState(null);
+    const [allMessages, setAllMessages] = useState({});
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleNewMessage = (msg) => {
+            console.log("Global Socket - Message Received:", msg);
+
+            setAllMessages((prev) => {
+                const roomId = msg.room_id;
+                const existingMsgs = prev[roomId] || [];
+
+                return {
+                    ...prev,
+                    [roomId]: [...existingMsgs, msg],
+                };
+            });
+        };
+
+        socket.on("new_message", handleNewMessage);
+
+        return () => {
+            socket.off("new_message", handleNewMessage);
+        };
+    }, [socket]);
 
     const handleLogin = async () => {
-        if (!usernameInput) return;
+        if (!usernameInput.trim()) return;
 
-        const response = await fetch("http://localhost:8000/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: usernameInput }),
-        });
+        try {
+            const response = await fetch("http://localhost:8000/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: usernameInput }),
+            });
 
-        if (response.ok) {
-            const data = await response.json();
-            if (data.id) {
-                setUser(data);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.id) {
+                    setUser(data);
+                }
+            } else {
+                console.error("Login failed server-side");
             }
+        } catch (error) {
+            console.error("Error connecting to Auth API:", error);
         }
     };
 
-    if (user && user.id) {
+    if (!user || !user.id) {
         return (
-            <div style={{ display: 'flex', height: '100vh', background: '#000' }}>
-                <Sidebar user_id={user.id} activeChat={activeChat} setActiveChat={setActiveChat} />
-                <ChatWindow activeChat={activeChat} user={user} />
+            <div className="login-screen">
+                <div className="login-card">
+                    <h1>RTC APPLICATION</h1>
+                    <p style={{ marginBottom: "20px", color: "var(--text)" }}>
+                        Real-time communication platform
+                    </p>
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                        <input
+                            type="text"
+                            value={usernameInput}
+                            onChange={(e) => setUsernameInput(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                            placeholder="What's your username?"
+                            autoFocus
+                        />
+                        <button onClick={handleLogin}>Join App</button>
+                    </div>
+                </div>
             </div>
         );
     }
 
     return (
-        <div style={styles.loginContainer}>
-            <h1>Enter your username</h1>
-            <input
-                style={styles.input}
-                value={usernameInput}
-                onChange={(e) => setUsernameInput(e.target.value)}
-                placeholder="e.g. Alex"
+        <div className="app-container">
+            <Sidebar
+                user_id={user.id}
+                activeChat={activeChat}
+                setActiveChat={setActiveChat}
             />
-            <button style={styles.button} onClick={handleLogin}>Join App</button>
+
+            <ChatWindow
+                activeChat={activeChat}
+                user={user}
+                allMessages={allMessages}
+                setAllMessages={setAllMessages}
+            />
         </div>
     );
 }
-
-const styles = {
-    loginContainer: { textAlign: 'center', marginTop: '100px', fontFamily: 'sans-serif' },
-    input: { padding: '10px', fontSize: '16px', borderRadius: '5px', border: '1px solid #ccc' },
-    button: { padding: '10px 20px', marginLeft: '10px', cursor: 'pointer', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px' }
-};
 
 export default App;
