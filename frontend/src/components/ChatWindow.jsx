@@ -6,9 +6,9 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
     const { socket } = useSocket();
     const { pc, localStream, remoteStream, startLocalStream, initPeerConnection, cleanup } = useWebRTC();
 
-    const [inputText, setInputText] = useState("");
     const [isCalling, setIsCalling] = useState(false);
     const [incomingCall, setIncomingCall] = useState(null);
+    const [inputText, setInputText] = useState("");
 
     const scrollRef = useRef();
     const activeChatRef = useRef(activeChat);
@@ -18,15 +18,10 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
 
     const currentMessages = (activeChat && allMessages[activeChat.id]) || [];
 
-
     useEffect(() => {
         if (isCalling) {
-            if (localVideoRef.current && localStream) {
-                localVideoRef.current.srcObject = localStream;
-            }
-            if (remoteVideoRef.current && remoteStream) {
-                remoteVideoRef.current.srcObject = remoteStream;
-            }
+            if (localVideoRef.current && localStream) localVideoRef.current.srcObject = localStream;
+            if (remoteVideoRef.current && remoteStream) remoteVideoRef.current.srcObject = remoteStream;
         }
     }, [localStream, remoteStream, isCalling]);
 
@@ -40,36 +35,48 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
     useEffect(() => {
         if (!socket) return;
 
-        socket.on("video_offer", (data) => {
-            console.log("Incoming offer...");
+        const handleOffer = (data) => {
+            console.log("Signal: Incoming Offer");
             setIncomingCall(data);
-        });
+        };
 
-        socket.on("video_answer", async (data) => {
-            console.log("Answer received, finishing handshake");
+        const handleAnswer = async (data) => {
+            console.log("Signal: Answer Received");
             if (callTimerRef.current) clearTimeout(callTimerRef.current);
             if (pc.current) {
                 await pc.current.setRemoteDescription(new RTCSessionDescription(data.answer));
             }
-        });
+        };
 
-        socket.on("new_ice_candidate", async (data) => {
+        const handleIce = async (data) => {
             if (pc.current && pc.current.remoteDescription) {
                 try {
                     await pc.current.addIceCandidate(new RTCIceCandidate(data.candidate));
                 } catch (e) { console.error("ICE Error", e); }
             }
-        });
+        };
 
-        socket.on("call_ended", () => stopCallUI());
+        const handleEnd = () => {
+            console.log("Signal: Call Ended by remote");
+            stopCallUI();
+        };
+
+        socket.on("video_offer", handleOffer);
+        socket.on("video_answer", handleAnswer);
+        socket.on("new_ice_candidate", handleIce);
+        socket.on("call_ended", handleEnd);
 
         return () => {
-            socket.off("video_offer");
-            socket.off("video_answer");
-            socket.off("new_ice_candidate");
-            socket.off("call_ended");
+            socket.off("video_offer", handleOffer);
+            socket.off("video_answer", handleAnswer);
+            socket.off("new_ice_candidate", handleIce);
+            socket.off("call_ended", handleEnd);
         };
-    }, [socket, pc]);
+    }, [socket, pc, cleanup]);
+
+    useEffect(() => {
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [currentMessages]);
 
     const handleStartCall = async () => {
         setIsCalling(true);
@@ -113,10 +120,7 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
     };
 
     const handleEndCall = () => {
-        socket.emit("end_call", {
-            to_room: activeChat?.id,
-            to_sid: incomingCall?.offering_sid
-        });
+        socket.emit("end_call", { to_room: activeChat?.id, to_sid: incomingCall?.offering_sid });
         stopCallUI();
     };
 
@@ -129,10 +133,6 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
         }
     }, [activeChat]);
 
-    useEffect(() => {
-        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [currentMessages]);
-
     const sendMessage = (e) => {
         e.preventDefault();
         if (!inputText.trim() || !socket || !activeChat) return;
@@ -140,20 +140,16 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
         setInputText("");
     };
 
-    if (!activeChat) return <div className="chat-empty-state"><h2>Select a chat</h2></div>;
+    if (!activeChat) return <div className="chat-empty-state"></div>;
 
     return (
         <div className="chat-window">
             {isCalling && (
                 <div className="video-overlay">
-                    {/* Big Video = Remote Stream */}
                     <video ref={remoteVideoRef} autoPlay playsInline className="remote-video" />
-
-                    {/* Small Video = Local Stream */}
                     <div className="local-video-pip">
                         <video ref={localVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
                     </div>
-
                     <button onClick={handleEndCall} className="end-call-btn">End Call</button>
                 </div>
             )}

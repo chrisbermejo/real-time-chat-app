@@ -7,26 +7,31 @@ export const useWebRTC = () => {
     const localStreamRef = useRef(null);
 
     const pcConfig = {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' }
-        ]
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
     };
 
     const cleanup = useCallback(() => {
+        console.log("WebRTC: Full Hardware & Connection Reset");
+
         if (pc.current) {
             pc.current.close();
             pc.current = null;
         }
+
         if (localStreamRef.current) {
             localStreamRef.current.getTracks().forEach(track => track.stop());
             localStreamRef.current = null;
         }
+
         setLocalStream(null);
         setRemoteStream(null);
     }, []);
 
     const initPeerConnection = useCallback((stream) => {
+        if (pc.current) {
+            pc.current.close();
+        }
+
         const peer = new RTCPeerConnection(pcConfig);
 
         stream.getTracks().forEach(track => {
@@ -34,7 +39,7 @@ export const useWebRTC = () => {
         });
 
         peer.ontrack = (event) => {
-            console.log("WebRTC: Received remote track");
+            console.log("WebRTC: Remote track received");
             if (event.streams && event.streams[0]) {
                 setRemoteStream(event.streams[0]);
             }
@@ -46,15 +51,12 @@ export const useWebRTC = () => {
 
     const startLocalStream = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true
-            });
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             setLocalStream(stream);
             localStreamRef.current = stream;
             return stream;
         } catch (e) {
-            console.error("WebRTC: Camera access denied", e);
+            console.error("WebRTC: Device access failed", e);
             return null;
         }
     };
