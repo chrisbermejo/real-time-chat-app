@@ -57,18 +57,18 @@ const Sidebar = ({ user_id, activeChat, setActiveChat }) => {
     };
 
     return (
-        <div style={styles.sidebar}>
-            <div style={styles.searchSection}>
+        <div className="sidebar">
+            <div className="sidebar-search-section">
                 <input
-                    style={styles.searchInput}
+                    className="sidebar-search-input"
                     placeholder="Search people..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 {searchResults.length > 0 && (
-                    <div style={styles.resultsDropdown}>
+                    <div className="sidebar-results-dropdown">
                         {searchResults.map(u => (
-                            <div key={u.id} style={styles.resultItem} onClick={() => addFriend(u.id)}>
+                            <div key={u.id} className="sidebar-result-item" onClick={() => addFriend(u.id)}>
                                 ➕ {u.username}
                             </div>
                         ))}
@@ -78,36 +78,22 @@ const Sidebar = ({ user_id, activeChat, setActiveChat }) => {
 
             <h4 style={{ color: '#888', marginBottom: '10px', fontSize: '12px', textTransform: 'uppercase' }}>Conversations</h4>
 
-            <ul style={styles.list}>
+            <ul className="sidebar-list">
                 {rooms.length === 0 && <li style={{ color: '#555', fontSize: '13px', padding: '10px' }}>No chats yet.</li>}
 
                 {rooms.map((room) => (
                     <li
                         key={room.id}
                         onClick={() => setActiveChat(room)}
-                        style={{
-                            ...styles.item,
-                            backgroundColor: activeChat?.id === room.id ? '#333' : 'transparent',
-                            borderLeft: activeChat?.id === room.id ? '4px solid #007bff' : '4px solid transparent'
-                        }}
+                        className={`sidebar-item ${activeChat?.id === room.id ? 'active' : ''}`}
                     >
-                        <span style={{ marginRight: '10px' }}>{room.is_group ? "👥" : "👤"}</span>
+                        <span>{room.is_group ? "👥" : "👤"}</span>
                         {room.name}
                     </li>
                 ))}
             </ul>
         </div>
     );
-};
-
-const styles = {
-    sidebar: { width: '300px', background: '#1a1a1a', color: '#fff', height: '100vh', padding: '15px', position: 'relative', borderRight: '1px solid #333', boxSizing: 'border-box' },
-    searchSection: { marginBottom: '20px' },
-    searchInput: { width: '100%', padding: '10px', background: '#2a2a2a', border: '1px solid #444', color: '#fff', borderRadius: '6px', boxSizing: 'border-box', outline: 'none' },
-    resultsDropdown: { position: 'absolute', top: '55px', left: '15px', right: '15px', background: '#2a2a2a', border: '1px solid #444', borderRadius: '6px', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' },
-    resultItem: { padding: '12px', cursor: 'pointer', borderBottom: '1px solid #333', fontSize: '14px', transition: 'background 0.2s' },
-    list: { listStyle: 'none', padding: 0, margin: 0 },
-    item: { padding: '12px', cursor: 'pointer', borderRadius: '4px', marginBottom: '4px', transition: 'background 0.2s', display: 'flex', alignItems: 'center' },
 };
 
 export default Sidebar;
