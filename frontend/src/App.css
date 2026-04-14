@@ -227,3 +227,104 @@ body {
     font-weight: 600;
     cursor: pointer;
 }
+
+.sidebar-item small {
+    display: block;
+    margin-top: 2px;
+}
+
+.sidebar-group-input {
+    background: #121212 !important;
+    border: 1px solid var(--accent) !important;
+}
+
+.sidebar-create-btn {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    color: var(--accent);
+    border: 1px dashed var(--accent);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+    margin-bottom: 20px;
+}
+
+.sidebar-create-btn:hover {
+    background: var(--accent-bg);
+}
+
+.sidebar-group-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 5px;
+    margin-bottom: 20px;
+}
+
+.sidebar-group-input {
+    width: 100%;
+    padding: 10px;
+    background: #2a2a2a;
+    border: 1px solid var(--accent);
+    color: #fff;
+    border-radius: 6px;
+    outline: none;
+}
+
+.sidebar-group-btns {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-cancel {
+    flex: 1;
+    background: #444;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 8px;
+}
+
+.invite-code {
+    color: #666;
+    font-size: 10px;
+    margin-top: 2px;
+}
+
+.room-name-container {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sidebar-join-btn {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    color: #4cd137;
+    border: 1px dashed #4cd137;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+    margin-bottom: 20px;
+}
+
+.sidebar-join-btn:hover {
+    background: rgba(76, 209, 55, 0.1);
+}
+
+.sidebar-join-input {
+    width: 100%;
+    padding: 10px;
+    background: #2a2a2a;
+    border: 1px solid #4cd137;
+    color: #fff;
+    border-radius: 6px;
+    outline: none;
+    text-transform: uppercase;
+}

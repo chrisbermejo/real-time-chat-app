@@ -23,7 +23,8 @@ async def get_my_chats(user_id: int, db: Session = Depends(get_db)):
         chat_list.append({
             "id": r.id, 
             "name": display_name,
-            "is_group": r.is_group
+            "is_group": r.is_group,
+            "invite_code": r.invite_code
         })
         
     return chat_list
