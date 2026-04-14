@@ -12,20 +12,18 @@ async def get_my_chats(user_id: int, db: Session = Depends(get_db)):
     
     chat_list = []
     for r in rooms:
-        display_name = r.name
+        display_name = r.name 
         
         if not r.is_group:
-            other_user = next((m for m in r.members if m.id != user_id), None)
-            if other_user:
-                display_name = other_user.username
-            else:
-                display_name = "Saved Messages (You)"
+            for member in r.members:
+                if member.id != user_id:
+                    display_name = member.username
+                    break
         
         chat_list.append({
             "id": r.id, 
             "name": display_name,
-            "is_group": r.is_group,
-            "invite_code": r.invite_code
+            "is_group": r.is_group
         })
         
     return chat_list
