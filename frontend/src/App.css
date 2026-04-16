@@ -321,3 +321,70 @@ body {
     outline: none;
     text-transform: uppercase;
 }
+
+/* --- NEW VIDEO UI POLISH --- */
+
+.video-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    /* Slight transparency looks pro */
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    padding: 40px;
+    /* The requested padding */
+}
+
+.video-main {
+    position: relative;
+    flex: 1;
+    background: #1a1a1a;
+    border-radius: 24px;
+    /* Rounded corners for the "Pro" look */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+}
+
+.remote-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* Ensures the whole person fits without being cut off */
+}
+
+.video-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    color: #444;
+}
+
+.video-placeholder-icon {
+    font-size: 80px;
+    opacity: 0.4;
+}
+
+.video-placeholder-text {
+    font-size: 14px;
+    color: var(--text);
+    opacity: 0.6;
+    font-weight: 500;
+}
+
+.local-video-pip {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 200px;
+    aspect-ratio: 16/9;
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 101;
+    background: #000;
+}

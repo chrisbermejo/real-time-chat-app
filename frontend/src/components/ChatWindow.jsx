@@ -75,7 +75,10 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
     }, [socket, pc, cleanup]);
 
     useEffect(() => {
-        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+        const timer = setTimeout(() => {
+            scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 50);
+        return () => clearTimeout(timer);
     }, [currentMessages]);
 
     const handleStartCall = async () => {
@@ -84,11 +87,8 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
         if (!stream) return setIsCalling(false);
 
         const peer = initPeerConnection(stream);
-
         peer.onicecandidate = (e) => {
-            if (e.candidate) {
-                socket.emit("new_ice_candidate", { to_room: activeChat.id, candidate: e.candidate });
-            }
+            if (e.candidate) socket.emit("new_ice_candidate", { to_room: activeChat.id, candidate: e.candidate });
         };
 
         const offer = await peer.createOffer();
@@ -104,11 +104,8 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
         if (!stream) return stopCallUI();
 
         const peer = initPeerConnection(stream);
-
         peer.onicecandidate = (e) => {
-            if (e.candidate) {
-                socket.emit("new_ice_candidate", { to_sid: incomingCall.offering_sid, candidate: e.candidate });
-            }
+            if (e.candidate) socket.emit("new_ice_candidate", { to_sid: incomingCall.offering_sid, candidate: e.candidate });
         };
 
         await peer.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
@@ -146,11 +143,21 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
         <div className="chat-window">
             {isCalling && (
                 <div className="video-overlay">
-                    <video ref={remoteVideoRef} autoPlay playsInline className="remote-video" />
-                    <div className="local-video-pip">
-                        <video ref={localVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
+                    <div className="video-main">
+                        {remoteStream ? (
+                            <video ref={remoteVideoRef} autoPlay playsInline className="remote-video" />
+                        ) : (
+                            <div className="video-placeholder">
+                                <div className="video-placeholder-icon">👤</div>
+                                <div className="video-placeholder-text">Waiting for {activeChat.name} to join...</div>
+                            </div>
+                        )}
+
+                        <div className="local-video-pip">
+                            <video ref={localVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
+                        </div>
+                        <button onClick={handleEndCall} className="end-call-btn">End Call</button>
                     </div>
-                    <button onClick={handleEndCall} className="end-call-btn">End Call</button>
                 </div>
             )}
 
@@ -165,7 +172,7 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
                     </>
                 ) : (
                     <>
-                        <h2>{activeChat.name}</h2>
+                        <h2 style={{ display: 'flex', alignItems: 'center' }}>{activeChat.name}</h2>
                         {!isCalling && <button onClick={handleStartCall} className="video-call-btn">📹 Video Call</button>}
                     </>
                 )}
@@ -177,7 +184,7 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
                         {m.content}
                     </div>
                 ))}
-                <div ref={scrollRef} />
+                <div ref={scrollRef} style={{ height: '1px' }} />
             </div>
 
             <form onSubmit={sendMessage} className="chat-input-area">
