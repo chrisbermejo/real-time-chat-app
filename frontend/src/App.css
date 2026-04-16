@@ -292,6 +292,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    padding-left: 10px;
 }
 
 .sidebar-join-btn {
