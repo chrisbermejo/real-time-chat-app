@@ -92,6 +92,7 @@ function App() {
                     <h1 className="login-card-heading">Chatsense</h1>
                     <p className="login-card-paragraph">{isSignup ? "Create an account" : "Welcome back!"}</p>
                     <form onSubmit={handleAuth} className="login-card-form">
+                        {error && <div className="form-error">{error}</div>}
                         {isSignup && (
                             <>
                                 <input placeholder="Full Name" onChange={e => setFormData({ ...formData, full_name: e.target.value })} required />
@@ -102,11 +103,10 @@ function App() {
                         <input type="password" placeholder="Password" onChange={e => setFormData({ ...formData, password: e.target.value })} required />
 
                         {isSignup && formData.password && (
-                            <div style={{ fontSize: '10px', textAlign: 'left', color: strength.color, marginBottom: '10px' }}>
+                            <div style={{ color: strength.color }} className="password-strength">
                                 Strength: {strength.text} (Min 8 chars, 1 Uppercase, 1 Number, 1 Special)
                             </div>
                         )}
-                        {error && <div style={{ color: '#ff4444', fontSize: '12px', marginBottom: '10px' }}>{error}</div>}
                         <button type="submit" className="login-btn">{isSignup ? "Sign Up" : "Login"}</button>
                     </form>
                     <button onClick={() => setIsSignup(!isSignup)} className="toggle-auth-btn">
