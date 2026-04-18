@@ -173,7 +173,7 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
                 ) : (
                     <>
                         <h2 style={{ display: 'flex', alignItems: 'center' }}>{activeChat.name}</h2>
-                        {!isCalling && <button onClick={handleStartCall} className="video-call-btn">📹 Video Call</button>}
+                        {!isCalling && <button onClick={handleStartCall} className="video-call-btn"><span>📹</span>Video Call</button>}
                     </>
                 )}
             </div>
