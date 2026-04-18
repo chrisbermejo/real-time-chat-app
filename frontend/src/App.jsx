@@ -62,9 +62,9 @@ function App() {
         return (
             <div className="login-screen">
                 <div className="login-card">
-                    <h1>RTC APPLICATION</h1>
+                    <h1>CHATSENSE</h1>
                     <p style={{ marginBottom: "20px", color: "var(--text)" }}>
-                        Real-time communication platform
+                        Real-time communication application
                     </p>
                     <div style={{ display: "flex", justifyContent: "center" }}>
                         <input

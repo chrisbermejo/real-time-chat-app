@@ -62,7 +62,7 @@ body {
 
 .sidebar-item.active {
     background: #333;
-    border-left: 4px solid #007bff;
+    border-left: 4px solid var(--accent);
 }
 
 .chat-window {
@@ -382,4 +382,8 @@ body {
     overflow: hidden;
     z-index: 101;
     background: #000;
+}
+
+.sidebar-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
 }
