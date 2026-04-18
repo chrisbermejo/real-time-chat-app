@@ -1,15 +1,18 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSocket } from '../context/SocketContext';
 
-const Sidebar = ({ user_id, activeChat, setActiveChat }) => {
+const Sidebar = ({ user, activeChat, setActiveChat, onLogout }) => {
     const { socket } = useSocket();
     const [rooms, setRooms] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
+
     const [isCreatingGroup, setIsCreatingGroup] = useState(false);
     const [newGroupName, setNewGroupName] = useState("");
     const [isJoiningGroup, setIsJoiningGroup] = useState(false);
     const [inviteCodeInput, setInviteCodeInput] = useState("");
+
+    const user_id = user?.id;
 
     const fetchMyChats = useCallback(() => {
         if (user_id && typeof user_id === 'number') {
@@ -100,10 +103,10 @@ const Sidebar = ({ user_id, activeChat, setActiveChat }) => {
             )}
 
             {!isJoiningGroup ? (
-                <button onClick={() => { setIsJoiningGroup(true); setIsCreatingGroup(false); }} className="sidebar-join-btn">Enter Group Code</button>
+                <button onClick={() => { setIsJoiningGroup(true); setIsCreatingGroup(false); }} className="sidebar-join-btn"># Join with Code</button>
             ) : (
                 <div className="sidebar-group-form">
-                    <input className="sidebar-join-input" placeholder="Invite Code (e.g. A1B2)" value={inviteCodeInput} onChange={(e) => setInviteCodeInput(e.target.value)} autoFocus />
+                    <input className="sidebar-join-input" placeholder="Invite Code" value={inviteCodeInput} onChange={(e) => setInviteCodeInput(e.target.value)} autoFocus />
                     <div className="sidebar-group-btns">
                         <button onClick={handleJoinGroup} className="video-call-btn" style={{ flex: 1, background: '#4cd137' }}>Join</button>
                         <button onClick={() => setIsJoiningGroup(false)} className="btn-cancel">Cancel</button>
@@ -113,7 +116,7 @@ const Sidebar = ({ user_id, activeChat, setActiveChat }) => {
 
             <h4 style={{ color: '#888', marginBottom: '10px', fontSize: '11px', textTransform: 'uppercase' }}>Conversations</h4>
 
-            <ul className="sidebar-list">
+            <ul className="sidebar-list" style={{ listStyle: 'none', padding: 0, overflowY: 'auto' }}>
                 {rooms.map((room) => (
                     <li key={room.id} onClick={() => setActiveChat(room)} className={`sidebar-item ${activeChat?.id === room.id ? 'active' : ''}`}>
                         <span>{room.is_group ? "👥" : "👤"}</span>
@@ -124,6 +127,13 @@ const Sidebar = ({ user_id, activeChat, setActiveChat }) => {
                     </li>
                 ))}
             </ul>
+
+            <div className="sidebar-footer">
+                <span className="user-info">@{user.username}</span>
+                <button onClick={onLogout} className="logout-btn">
+                    Logout
+                </button>
+            </div>
         </div>
     );
 };

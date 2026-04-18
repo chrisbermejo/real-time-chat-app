@@ -13,14 +13,11 @@ room_members = Table(
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String)
+    email = Column(String, unique=True, index=True)
     username = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
     
-    friends = relationship(
-        "User",
-        secondary="friendships",
-        primaryjoin="User.id==friendships.c.user_id",
-        secondaryjoin="User.id==friendships.c.friend_id"
-    )
     rooms = relationship("Room", secondary=room_members, back_populates="members")
 
 class Friendship(Base):
