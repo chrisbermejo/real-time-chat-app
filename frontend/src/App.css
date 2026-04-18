@@ -256,8 +256,7 @@ body {
 }
 
 .sidebar-create-btn:hover {
-    background: var(--accent-bg);
-    border-color: var(--accent);
+    background: #a857f81c
 }
 
 .sidebar-group-form {
