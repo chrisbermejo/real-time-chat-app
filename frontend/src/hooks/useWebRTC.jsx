@@ -49,9 +49,12 @@ export const useWebRTC = () => {
         return peer;
     }, []);
 
-    const startLocalStream = async () => {
+    const startLocalStream = async (useVideo = true) => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: useVideo,
+                audio: true
+            });
             setLocalStream(stream);
             localStreamRef.current = stream;
             return stream;
@@ -60,6 +63,8 @@ export const useWebRTC = () => {
             return null;
         }
     };
+
+
 
     return { pc, localStream, remoteStream, startLocalStream, initPeerConnection, cleanup };
 };

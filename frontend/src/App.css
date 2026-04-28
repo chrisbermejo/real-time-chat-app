@@ -527,3 +527,86 @@ body {
 .sidebar-result-item:last-child {
     border-bottom: none;
 }
+
+.control-btn:hover {
+    background: #444;
+}
+
+.control-btn.off {
+    background: #ff4444;
+}
+
+.voice-call-btn {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+
+.voice-call-btn:hover {
+    background: var(--accent-bg);
+}
+
+.voice-call-btn span {
+    display: flex;
+    align-items: center;
+    transform: translateY(-1px);
+}
+
+.video-controls-bar {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+    z-index: 110;
+}
+
+.control-btn {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.control-btn span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    transform: translateY(-1px);
+    line-height: 1;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.control-btn.off {
+    background: #ff4444;
+}
+
+.camera span {
+    line-height: 0.6 !important;
+
+}
+
+.phone span {
+    filter: grayscale(100%);
+}

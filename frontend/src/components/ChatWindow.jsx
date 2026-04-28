@@ -10,6 +10,10 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
     const [incomingCall, setIncomingCall] = useState(null);
     const [inputText, setInputText] = useState("");
 
+    const [micActive, setMicActive] = useState(true);
+    const [camActive, setCamActive] = useState(true);
+    const [isDeafened, setIsDeafened] = useState(false);
+
     const scrollRef = useRef();
     const activeChatRef = useRef(activeChat);
     const localVideoRef = useRef();
@@ -29,61 +33,61 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
         cleanup();
         setIsCalling(false);
         setIncomingCall(null);
+        setMicActive(true);
+        setCamActive(true);
+        setIsDeafened(false);
         if (callTimerRef.current) clearTimeout(callTimerRef.current);
+    };
+
+    const toggleMic = () => {
+        if (localStream) {
+            localStream.getAudioTracks()[0].enabled = !micActive;
+            setMicActive(!micActive);
+        }
+    };
+
+    const toggleCam = () => {
+        if (localStream && localStream.getVideoTracks().length > 0) {
+            localStream.getVideoTracks()[0].enabled = !camActive;
+            setCamActive(!camActive);
+        }
+    };
+
+    const toggleDeafen = () => {
+        setIsDeafened(!isDeafened);
     };
 
     useEffect(() => {
         if (!socket) return;
-
-        const handleOffer = (data) => {
-            console.log("Signal: Incoming Offer");
-            setIncomingCall(data);
-        };
-
-        const handleAnswer = async (data) => {
-            console.log("Signal: Answer Received");
+        const hOffer = (data) => setIncomingCall(data);
+        const hAnswer = async (data) => {
             if (callTimerRef.current) clearTimeout(callTimerRef.current);
-            if (pc.current) {
-                await pc.current.setRemoteDescription(new RTCSessionDescription(data.answer));
-            }
+            if (pc.current) await pc.current.setRemoteDescription(new RTCSessionDescription(data.answer));
         };
-
-        const handleIce = async (data) => {
+        const hIce = async (data) => {
             if (pc.current && pc.current.remoteDescription) {
-                try {
-                    await pc.current.addIceCandidate(new RTCIceCandidate(data.candidate));
-                } catch (e) { console.error("ICE Error", e); }
+                try { await pc.current.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch (e) { }
             }
         };
+        const hEnd = () => stopCallUI();
 
-        const handleEnd = () => {
-            console.log("Signal: Call Ended by remote");
-            stopCallUI();
-        };
-
-        socket.on("video_offer", handleOffer);
-        socket.on("video_answer", handleAnswer);
-        socket.on("new_ice_candidate", handleIce);
-        socket.on("call_ended", handleEnd);
+        socket.on("video_offer", hOffer);
+        socket.on("video_answer", hAnswer);
+        socket.on("new_ice_candidate", hIce);
+        socket.on("call_ended", hEnd);
 
         return () => {
-            socket.off("video_offer", handleOffer);
-            socket.off("video_answer", handleAnswer);
-            socket.off("new_ice_candidate", handleIce);
-            socket.off("call_ended", handleEnd);
+            socket.off("video_offer", hOffer);
+            socket.off("video_answer", hAnswer);
+            socket.off("new_ice_candidate", hIce);
+            socket.off("call_ended", hEnd);
         };
-    }, [socket, pc, cleanup]);
+    }, [socket, pc]);
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 50);
-        return () => clearTimeout(timer);
-    }, [currentMessages]);
-
-    const handleStartCall = async () => {
+    const handleStartCall = async (withVideo = true) => {
         setIsCalling(true);
-        const stream = await startLocalStream();
+        setCamActive(withVideo);
+        const stream = await startLocalStream(withVideo);
         if (!stream) return setIsCalling(false);
 
         const peer = initPeerConnection(stream);
@@ -94,24 +98,20 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
         const offer = await peer.createOffer();
         await peer.setLocalDescription(offer);
         socket.emit("video_offer", { to_room: activeChat.id, offer, caller_name: user.username });
-
         callTimerRef.current = setTimeout(() => handleEndCall(), 15000);
     };
 
     const handleAnswerCall = async () => {
         setIsCalling(true);
-        const stream = await startLocalStream();
+        const stream = await startLocalStream(true);
         if (!stream) return stopCallUI();
-
         const peer = initPeerConnection(stream);
         peer.onicecandidate = (e) => {
             if (e.candidate) socket.emit("new_ice_candidate", { to_sid: incomingCall.offering_sid, candidate: e.candidate });
         };
-
         await peer.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
         const answer = await peer.createAnswer();
         await peer.setLocalDescription(answer);
-
         socket.emit("video_answer", { to_sid: incomingCall.offering_sid, answer });
         setIncomingCall(null);
     };
@@ -130,6 +130,11 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
         }
     }, [activeChat]);
 
+    useEffect(() => {
+        const timer = setTimeout(() => { scrollRef.current?.scrollIntoView({ behavior: "smooth" }); }, 50);
+        return () => clearTimeout(timer);
+    }, [currentMessages]);
+
     const sendMessage = (e) => {
         e.preventDefault();
         if (!inputText.trim() || !socket || !activeChat) return;
@@ -145,18 +150,45 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
                 <div className="video-overlay">
                     <div className="video-main">
                         {remoteStream ? (
-                            <video ref={remoteVideoRef} autoPlay playsInline className="remote-video" />
+                            <video
+                                ref={remoteVideoRef}
+                                autoPlay
+                                playsInline
+                                className="remote-video"
+                                muted={isDeafened}
+                            />
                         ) : (
                             <div className="video-placeholder">
                                 <div className="video-placeholder-icon">👤</div>
-                                <div className="video-placeholder-text">Waiting for {activeChat.name} to join...</div>
+                                <div className="video-placeholder-text">Waiting for {activeChat.name}...</div>
                             </div>
                         )}
 
                         <div className="local-video-pip">
-                            <video ref={localVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
+                            {camActive ? (
+                                <video ref={localVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
+                            ) : (
+                                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000' }}>📷 Off</div>
+                            )}
                         </div>
-                        <button onClick={handleEndCall} className="end-call-btn">End Call</button>
+
+                        <div className="video-controls-bar">
+                            <button onClick={toggleMic} className={`control-btn ${!micActive ? 'off' : ''}`}>
+                                <span>{micActive ? '🎤' : '🎙️'}</span>
+                            </button>
+
+                            <button onClick={toggleCam} className={`control-btn camera ${!camActive ? 'off' : ''}`}>
+                                <span>{camActive ? '📹' : '📷'}</span>
+                            </button>
+
+                            <button onClick={toggleDeafen} className={`control-btn ${isDeafened ? 'off' : ''}`}>
+                                <span>{isDeafened ? '🔇' : '🎧'}</span>
+                            </button>
+
+                            <button onClick={handleEndCall} className="control-btn off phone">
+                                <span>📞</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -172,8 +204,17 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
                     </>
                 ) : (
                     <>
-                        <h2 style={{ display: 'flex', alignItems: 'center' }}>{activeChat.name}</h2>
-                        {!isCalling && <button onClick={handleStartCall} className="video-call-btn"><span>📹</span>Video Call</button>}
+                        <h2>{activeChat.name}</h2>
+                        {!isCalling && (
+                            <div style={{ display: 'flex' }}>
+                                <button onClick={() => handleStartCall(false)} className="voice-call-btn">
+                                    <span>📞</span> Voice Call
+                                </button>
+                                <button onClick={() => handleStartCall(true)} className="video-call-btn">
+                                    <span>📹</span> Video Call
+                                </button>
+                            </div>
+                        )}
                     </>
                 )}
             </div>
