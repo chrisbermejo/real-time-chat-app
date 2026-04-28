@@ -19,6 +19,92 @@ body {
     overflow: hidden;
 }
 
+.light-theme {
+    --bg: #ffffff;
+    --sidebar-bg: #f3f4f6;
+    --border: #d1d5db;
+    --text: #111827;
+    --text-h: #111827;
+}
+
+.light-theme .chat-window {
+    background: #ffffff;
+    color: var(--text);
+}
+
+.light-theme .sidebar {
+    color: black
+}
+
+.light-theme .chat-header {
+    background: #f9fafb;
+    border-bottom: 1px solid var(--border);
+}
+
+.light-theme .messages-list {
+    background: #ffffff;
+}
+
+.light-theme .message-theirs {
+    background: #e5e7eb;
+    color: #000;
+}
+
+.light-theme .chat-input-area {
+    background: #f9fafb;
+    border-top: 1px solid var(--border);
+}
+
+.light-theme .chat-input {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: #000;
+}
+
+.light-theme .sidebar {
+    background: #f3f4f6;
+    border-right: 1px solid var(--border);
+}
+
+.light-theme .sidebar-search-input {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: #000;
+}
+
+.light-theme .sidebar-item.active {
+    background: #e5e7eb;
+}
+
+.light-theme .sidebar-footer {
+    border-top: 1px solid var(--border);
+}
+
+.light-theme .user-info {
+    color: var(--text);
+}
+
+.theme-toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    border-radius: 5px;
+    transition: background 0.2s;
+}
+
+.theme-toggle-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.light-theme .theme-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
 .app-container {
     display: flex;
     width: 100vw;

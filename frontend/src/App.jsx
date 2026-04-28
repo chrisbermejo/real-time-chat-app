@@ -15,6 +15,7 @@ function App() {
     const [error, setError] = useState("");
     const [activeChat, setActiveChat] = useState(null);
     const [allMessages, setAllMessages] = useState({});
+    const [theme, setTheme] = useState(localStorage.getItem("chatsense_theme") || "dark");
 
     useEffect(() => {
         const savedUser = localStorage.getItem("chatsense_user");
@@ -40,6 +41,19 @@ function App() {
         socket.on("new_message", handleNewMessage);
         return () => socket.off("new_message", handleNewMessage);
     }, [socket]);
+
+    useEffect(() => {
+        if (theme === "light") {
+            document.body.classList.add("light-theme");
+        } else {
+            document.body.classList.remove("light-theme");
+        }
+        localStorage.setItem("chatsense_theme", theme);
+    }, [theme]);
+
+    const toggleTheme = () => {
+        setTheme(prev => prev === "dark" ? "light" : "dark");
+    };
 
     const handleAuth = async (e) => {
         e.preventDefault();
@@ -119,7 +133,14 @@ function App() {
 
     return (
         <div className="app-container">
-            <Sidebar user={user} activeChat={activeChat} setActiveChat={setActiveChat} onLogout={handleLogout} />
+            <Sidebar
+                user={user}
+                activeChat={activeChat}
+                setActiveChat={setActiveChat}
+                onLogout={handleLogout}
+                theme={theme}
+                toggleTheme={toggleTheme}
+            />
             <ChatWindow
                 activeChat={activeChat}
                 user={user}

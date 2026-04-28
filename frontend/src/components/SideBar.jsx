@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSocket } from '../context/SocketContext';
 
-const Sidebar = ({ user, activeChat, setActiveChat, onLogout }) => {
+const Sidebar = ({ user, activeChat, setActiveChat, onLogout, theme, toggleTheme }) => {
     const { socket } = useSocket();
     const [rooms, setRooms] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
@@ -130,6 +130,9 @@ const Sidebar = ({ user, activeChat, setActiveChat, onLogout }) => {
 
             <div className="sidebar-footer">
                 <span className="user-info">@{user.username}</span>
+                <button onClick={toggleTheme} className="theme-toggle-btn" title="Toggle Light/Dark Mode">
+                    <span>{theme === "dark" ? "☀️" : "🌙"}</span>
+                </button>
                 <button onClick={onLogout} className="logout-btn">
                     Logout
                 </button>
