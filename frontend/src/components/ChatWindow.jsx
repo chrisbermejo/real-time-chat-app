@@ -6,9 +6,9 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
     const { socket } = useSocket();
     const { pc, localStream, remoteStream, startLocalStream, initPeerConnection, cleanup } = useWebRTC();
 
+    const [inputText, setInputText] = useState("");
     const [isCalling, setIsCalling] = useState(false);
     const [incomingCall, setIncomingCall] = useState(null);
-    const [inputText, setInputText] = useState("");
 
     const [micActive, setMicActive] = useState(true);
     const [camActive, setCamActive] = useState(true);
@@ -24,10 +24,14 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
 
     useEffect(() => {
         if (isCalling) {
-            if (localVideoRef.current && localStream) localVideoRef.current.srcObject = localStream;
-            if (remoteVideoRef.current && remoteStream) remoteVideoRef.current.srcObject = remoteStream;
+            if (localVideoRef.current && localStream && camActive) {
+                localVideoRef.current.srcObject = localStream;
+            }
+            if (remoteVideoRef.current && remoteStream) {
+                remoteVideoRef.current.srcObject = remoteStream;
+            }
         }
-    }, [localStream, remoteStream, isCalling]);
+    }, [localStream, remoteStream, isCalling, camActive]);
 
     const stopCallUI = () => {
         cleanup();
@@ -48,8 +52,9 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
 
     const toggleCam = () => {
         if (localStream && localStream.getVideoTracks().length > 0) {
-            localStream.getVideoTracks()[0].enabled = !camActive;
-            setCamActive(!camActive);
+            const newState = !camActive;
+            localStream.getVideoTracks()[0].enabled = newState;
+            setCamActive(newState);
         }
     };
 
@@ -131,8 +136,8 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
     }, [activeChat]);
 
     useEffect(() => {
-        const timer = setTimeout(() => { scrollRef.current?.scrollIntoView({ behavior: "smooth" }); }, 50);
-        return () => clearTimeout(timer);
+        const timeout = setTimeout(() => { if (scrollRef.current) scrollRef.current.scrollIntoView({ behavior: "smooth" }); }, 50);
+        return () => clearTimeout(timeout);
     }, [currentMessages]);
 
     const sendMessage = (e) => {
@@ -150,17 +155,11 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
                 <div className="video-overlay">
                     <div className="video-main">
                         {remoteStream ? (
-                            <video
-                                ref={remoteVideoRef}
-                                autoPlay
-                                playsInline
-                                className="remote-video"
-                                muted={isDeafened}
-                            />
+                            <video ref={remoteVideoRef} autoPlay playsInline className="remote-video" muted={isDeafened} />
                         ) : (
                             <div className="video-placeholder">
                                 <div className="video-placeholder-icon">👤</div>
-                                <div className="video-placeholder-text">Waiting for {activeChat.name}...</div>
+                                <div className="video-placeholder-text">Waiting for {activeChat.name} to join...</div>
                             </div>
                         )}
 
@@ -168,7 +167,9 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
                             {camActive ? (
                                 <video ref={localVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
                             ) : (
-                                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000' }}>📷 Off</div>
+                                <div className="cam-off-placeholder">
+                                    <span><span style={{ fontSize: '20px', transform: 'none' }}>📷</span> Off</span>
+                                </div>
                             )}
                         </div>
 
@@ -176,16 +177,13 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
                             <button onClick={toggleMic} className={`control-btn ${!micActive ? 'off' : ''}`}>
                                 <span>{micActive ? '🎤' : '🎙️'}</span>
                             </button>
-
-                            <button onClick={toggleCam} className={`control-btn camera ${!camActive ? 'off' : ''}`}>
+                            <button onClick={toggleCam} className={`control-btn ${!camActive ? 'off' : ''}`}>
                                 <span>{camActive ? '📹' : '📷'}</span>
                             </button>
-
                             <button onClick={toggleDeafen} className={`control-btn ${isDeafened ? 'off' : ''}`}>
                                 <span>{isDeafened ? '🔇' : '🎧'}</span>
                             </button>
-
-                            <button onClick={handleEndCall} className="control-btn off phone">
+                            <button onClick={handleEndCall} className="control-btn off">
                                 <span>📞</span>
                             </button>
                         </div>
@@ -197,8 +195,8 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
                 {incomingCall && !isCalling ? (
                     <>
                         <h2 style={{ color: 'var(--accent)' }}>{incomingCall.caller_name} is calling...</h2>
-                        <div>
-                            <button onClick={handleAnswerCall} className="video-call-btn" style={{ marginRight: '10px' }}>Accept</button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button onClick={handleAnswerCall} className="video-call-btn">Accept</button>
                             <button onClick={() => setIncomingCall(null)} style={{ background: '#ff4444', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Decline</button>
                         </div>
                     </>
@@ -207,12 +205,8 @@ const ChatWindow = ({ activeChat, user, allMessages, setAllMessages }) => {
                         <h2>{activeChat.name}</h2>
                         {!isCalling && (
                             <div style={{ display: 'flex' }}>
-                                <button onClick={() => handleStartCall(false)} className="voice-call-btn">
-                                    <span>📞</span> Voice Call
-                                </button>
-                                <button onClick={() => handleStartCall(true)} className="video-call-btn">
-                                    <span>📹</span> Video Call
-                                </button>
+                                <button onClick={() => handleStartCall(false)} className="voice-call-btn"><span>📞</span> Voice Call</button>
+                                <button onClick={() => handleStartCall(true)} className="video-call-btn"><span>📹</span> Video Call</button>
                             </div>
                         )}
                     </>
