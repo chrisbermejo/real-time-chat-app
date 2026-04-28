@@ -562,6 +562,10 @@ body {
 .user-info {
     font-size: 12px;
     color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
 }
 
 .password-strength {
@@ -695,4 +699,78 @@ body {
 
 .phone span {
     filter: grayscale(100%);
+}
+
+.sidebar-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.theme-toggle-btn,
+.logout-btn {
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.theme-toggle-btn:hover,
+.logout-btn:hover {
+    opacity: 1;
+    border-color: var(--accent);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.light-theme .theme-toggle-btn:hover,
+.light-theme .logout-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.video-call-btn,
+.voice-call-btn {
+    border: 1px solid var(--border);
+    background: transparent;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease-in-out;
+    font-family: inherit;
+}
+
+.video-call-btn {
+    color: #28a745;
+}
+
+.voice-call-btn {
+    color: var(--accent);
+}
+
+.video-call-btn:hover,
+.voice-call-btn:hover {
+    border-color: var(--accent);
+    background-color: rgba(255, 255, 255, 0.05);
+    filter: brightness(1.2);
+}
+
+.light-theme .video-call-btn:hover,
+.light-theme .voice-call-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.video-call-btn span,
+.voice-call-btn span {
+    display: flex;
+    align-items: center;
+    transform: translateY(-1.5px);
 }

@@ -130,12 +130,14 @@ const Sidebar = ({ user, activeChat, setActiveChat, onLogout, theme, toggleTheme
 
             <div className="sidebar-footer">
                 <span className="user-info">@{user.username}</span>
-                <button onClick={toggleTheme} className="theme-toggle-btn" title="Toggle Light/Dark Mode">
-                    <span>{theme === "dark" ? "☀️" : "🌙"}</span>
-                </button>
-                <button onClick={onLogout} className="logout-btn">
-                    Logout
-                </button>
+                <div className="sidebar-footer-actions">
+                    <button onClick={toggleTheme} className="theme-toggle-btn" title="Toggle Theme">
+                        <span>{theme === "dark" ? "☀️" : "🌙"}</span>
+                    </button>
+                    <button onClick={onLogout} className="logout-btn">
+                        Logout
+                    </button>
+                </div>
             </div>
         </div>
     );
